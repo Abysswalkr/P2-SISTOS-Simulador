@@ -1,0 +1,4 @@
+mutex1, 1
+mutex2, 1
+semaforo1, 3
+semaforo2, 2 

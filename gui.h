@@ -6,7 +6,8 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
-#include "simulador_calendarizacion.h"
+#include "simulador_sincronizacion.h"
+#include "parser.h"
 
 class GUI {
 private:
@@ -14,7 +15,7 @@ private:
     sf::Font font;
     
     // Simulador
-    SimuladorCalendarizacion simulador;
+    SimuladorSincronizacion simulador;
     TipoAlgoritmo algoritmoActual;
     
     // Configuración visual
@@ -31,6 +32,11 @@ private:
     // Colores para procesos
     std::map<std::string, sf::Color> coloresProcesos;
     std::vector<sf::Color> paletaColores;
+    
+    // Estado de carga de archivos
+    bool procesosLoaded = false;
+    bool recursosLoaded = false;
+    bool accionesLoaded = false;
     
     // Botones simples
     struct Boton {
@@ -76,8 +82,11 @@ public:
         crearBoton(490, 50, 100, 30, "Priority", "priority");
         
         // Botones de control
-        crearBoton(700, 50, 120, 30, "Cargar", "cargar");
-        crearBoton(830, 50, 120, 30, "Ejecutar", "ejecutar");
+        crearBoton(650, 50, 140, 30, "Cargar Procesos", "cargar_procesos");
+        crearBoton(800, 50, 140, 30, "Cargar Recursos", "cargar_recursos");
+        crearBoton(950, 50, 140, 30, "Cargar Acciones", "cargar_acciones");
+        crearBoton(50, 90, 120, 30, "Ejecutar", "ejecutar");
+        crearBoton(180, 90, 120, 30, "Set Quantum", "set_quantum");
     }
     
     void crearBoton(float x, float y, float w, float h, 
@@ -91,7 +100,7 @@ public:
         
         btn.texto.setFont(font);
         btn.texto.setString(texto);
-        btn.texto.setCharacterSize(16);
+        btn.texto.setCharacterSize(14);
         btn.texto.setFillColor(sf::Color::Black);
         
         // Centrar texto
@@ -142,17 +151,26 @@ public:
         else if (id == "srtf") algoritmoActual = SRTF;
         else if (id == "rr") algoritmoActual = ROUND_ROBIN;
         else if (id == "priority") algoritmoActual = PRIORITY;
-        else if (id == "cargar") {
-            cargarArchivo();
+        else if (id == "cargar_procesos") {
+            cargarProcesos();
+        }
+        else if (id == "cargar_recursos") {
+            cargarRecursos();
+        }
+        else if (id == "cargar_acciones") {
+            cargarAcciones();
         }
         else if (id == "ejecutar") {
             ejecutarSimulacion();
         }
+        else if (id == "set_quantum") {
+            // Por simplicidad, usar un quantum fijo
+            simulador.setQuantum(3);
+        }
     }
     
-    void cargarArchivo() {
+    void cargarProcesos() {
         try {
-            // Por ahora, cargar archivo fijo "procesos.txt"
             std::vector<Proceso> procs = Parser::cargarProcesos("procesos.txt");
             simulador.cargarProcesos(procs);
             
@@ -162,13 +180,40 @@ public:
                 coloresProcesos[p.pid] = paletaColores[colorIndex % paletaColores.size()];
                 colorIndex++;
             }
+            
+            procesosLoaded = true;
         } catch (const std::exception& e) {
             // Manejar error
+            procesosLoaded = false;
+        }
+    }
+    
+    void cargarRecursos() {
+        try {
+            std::vector<Recurso> recs = Parser::cargarRecursos("recursos.txt");
+            simulador.cargarRecursos(recs);
+            recursosLoaded = true;
+        } catch (const std::exception& e) {
+            // Manejar error
+            recursosLoaded = false;
+        }
+    }
+    
+    void cargarAcciones() {
+        try {
+            std::vector<Accion> acts = Parser::cargarAcciones("acciones.txt");
+            simulador.cargarAcciones(acts);
+            accionesLoaded = true;
+        } catch (const std::exception& e) {
+            // Manejar error
+            accionesLoaded = false;
         }
     }
     
     void ejecutarSimulacion() {
-        simulador.ejecutar(algoritmoActual);
+        if (procesosLoaded) {
+            simulador.ejecutar(algoritmoActual);
+        }
     }
     
     void dibujar() {
@@ -176,6 +221,13 @@ public:
         
         // Dibujar botones
         for (const auto& btn : botones) {
+            // Cambiar color según estado
+            if ((btn.id == "cargar_procesos" && procesosLoaded) ||
+                (btn.id == "cargar_recursos" && recursosLoaded) ||
+                (btn.id == "cargar_acciones" && accionesLoaded)) {
+                btn.shape.setFillColor(sf::Color(150, 255, 150)); // Verde claro
+            }
+            
             window.draw(btn.shape);
             window.draw(btn.texto);
         }
@@ -183,11 +235,14 @@ public:
         // Dibujar título
         sf::Text titulo;
         titulo.setFont(font);
-        titulo.setString("Simulador de Algoritmos de Calendarizacion");
-        titulo.setCharacterSize(24);
+        titulo.setString("Simulador de Algoritmos de Calendarizacion y Sincronizacion");
+        titulo.setCharacterSize(22);
         titulo.setFillColor(sf::Color::Black);
-        titulo.setPosition(WINDOW_WIDTH / 2 - 250, 10);
+        titulo.setPosition(WINDOW_WIDTH / 2 - 300, 10);
         window.draw(titulo);
+        
+        // Dibujar estado de carga
+        dibujarEstadoCarga();
         
         // Dibujar diagrama de Gantt
         dibujarGantt();
@@ -196,6 +251,22 @@ public:
         dibujarMetricas();
         
         window.display();
+    }
+    
+    void dibujarEstadoCarga() {
+        sf::Text estado;
+        estado.setFont(font);
+        estado.setCharacterSize(12);
+        estado.setPosition(50, 130);
+        
+        std::string textoEstado = "Estado: ";
+        textoEstado += procesosLoaded ? "Procesos OK " : "Procesos NO ";
+        textoEstado += recursosLoaded ? "| Recursos OK " : "| Recursos NO ";
+        textoEstado += accionesLoaded ? "| Acciones OK" : "| Acciones NO";
+        
+        estado.setString(textoEstado);
+        estado.setFillColor(sf::Color::Black);
+        window.draw(estado);
     }
     
     void dibujarGantt() {
@@ -217,7 +288,16 @@ public:
             // Rectángulo del proceso
             sf::RectangleShape rect(sf::Vector2f(width, GANTT_HEIGHT));
             rect.setPosition(x, GANTT_START_Y);
-            rect.setFillColor(coloresProcesos[evento.pid]);
+            
+            // Color según estado
+            if (evento.estado == "RUNNING") {
+                rect.setFillColor(coloresProcesos[evento.pid]);
+            } else if (evento.estado == "WAITING") {
+                rect.setFillColor(sf::Color(255, 200, 200)); // Rojo claro
+            } else if (evento.estado == "ACCESSED") {
+                rect.setFillColor(sf::Color(200, 255, 200)); // Verde claro
+            }
+            
             rect.setOutlineColor(sf::Color::Black);
             rect.setOutlineThickness(1);
             window.draw(rect);
@@ -226,7 +306,7 @@ public:
             sf::Text nombre;
             nombre.setFont(font);
             nombre.setString(evento.pid);
-            nombre.setCharacterSize(14);
+            nombre.setCharacterSize(12);
             nombre.setFillColor(sf::Color::Black);
             nombre.setPosition(x + width/2 - 10, GANTT_START_Y + GANTT_HEIGHT/2 - 10);
             window.draw(nombre);
@@ -244,6 +324,61 @@ public:
             marca.setPosition(x - 5, GANTT_START_Y + GANTT_HEIGHT + 15);
             window.draw(marca);
         }
+        
+        // Dibujar leyenda
+        dibujarLeyenda();
+    }
+    
+    void dibujarLeyenda() {
+        float leyendaY = GANTT_START_Y + GANTT_HEIGHT + 50;
+        
+        // Running
+        sf::RectangleShape runBox(sf::Vector2f(20, 20));
+        runBox.setPosition(50, leyendaY);
+        runBox.setFillColor(paletaColores[0]);
+        runBox.setOutlineColor(sf::Color::Black);
+        runBox.setOutlineThickness(1);
+        window.draw(runBox);
+        
+        sf::Text runText;
+        runText.setFont(font);
+        runText.setString("Running");
+        runText.setCharacterSize(12);
+        runText.setFillColor(sf::Color::Black);
+        runText.setPosition(75, leyendaY);
+        window.draw(runText);
+        
+        // Waiting
+        sf::RectangleShape waitBox(sf::Vector2f(20, 20));
+        waitBox.setPosition(150, leyendaY);
+        waitBox.setFillColor(sf::Color(255, 200, 200));
+        waitBox.setOutlineColor(sf::Color::Black);
+        waitBox.setOutlineThickness(1);
+        window.draw(waitBox);
+        
+        sf::Text waitText;
+        waitText.setFont(font);
+        waitText.setString("Waiting");
+        waitText.setCharacterSize(12);
+        waitText.setFillColor(sf::Color::Black);
+        waitText.setPosition(175, leyendaY);
+        window.draw(waitText);
+        
+        // Accessed
+        sf::RectangleShape accBox(sf::Vector2f(20, 20));
+        accBox.setPosition(250, leyendaY);
+        accBox.setFillColor(sf::Color(200, 255, 200));
+        accBox.setOutlineColor(sf::Color::Black);
+        accBox.setOutlineThickness(1);
+        window.draw(accBox);
+        
+        sf::Text accText;
+        accText.setFont(font);
+        accText.setString("Accessed Resource");
+        accText.setCharacterSize(12);
+        accText.setFillColor(sf::Color::Black);
+        accText.setPosition(275, leyendaY);
+        window.draw(accText);
     }
     
     void dibujarMetricas() {
@@ -270,6 +405,25 @@ public:
         avgCT.setFillColor(sf::Color::Black);
         avgCT.setPosition(50, 480);
         window.draw(avgCT);
+        
+        // Mostrar algoritmo actual
+        ss.str("");
+        ss << "Algoritmo: ";
+        switch(algoritmoActual) {
+            case FIFO: ss << "FIFO"; break;
+            case SJF: ss << "SJF"; break;
+            case SRTF: ss << "SRTF"; break;
+            case ROUND_ROBIN: ss << "Round Robin"; break;
+            case PRIORITY: ss << "Priority"; break;
+        }
+        
+        sf::Text algText;
+        algText.setFont(font);
+        algText.setString(ss.str());
+        algText.setCharacterSize(16);
+        algText.setFillColor(sf::Color::Black);
+        algText.setPosition(50, 510);
+        window.draw(algText);
     }
 };
 
