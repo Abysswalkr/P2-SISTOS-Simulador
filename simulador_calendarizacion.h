@@ -33,6 +33,7 @@ public:
     
     // Configurar quantum para Round Robin
     void setQuantum(int q) { quantum = q; }
+    int getQuantum() const { return quantum; }
     
     // Ejecutar simulación según el algoritmo
     void ejecutar(TipoAlgoritmo tipo) {
@@ -87,6 +88,14 @@ public:
         return procesos.empty() ? 0 : total / procesos.size();
     }
     
+    float getAvgResponseTime() const {
+        float total = 0;
+        for (const auto& p : procesos) {
+            total += p.responseTime;
+        }
+        return procesos.empty() ? 0 : total / procesos.size();
+    }
+    
 private:
     // Implementación de FIFO (First In First Out)
     void ejecutarFIFO() {
@@ -106,6 +115,7 @@ private:
             
             // Marcar inicio
             p.startTime = tiempoActual;
+            p.responseTime = p.startTime - p.arrivalTime;
             p.waitingTime = tiempoActual - p.arrivalTime;
             
             // Ejecutar proceso completo
@@ -163,6 +173,7 @@ private:
                 listos.erase(listos.begin());
                 
                 p->startTime = tiempoActual;
+                p->responseTime = p->startTime - p->arrivalTime;
                 p->waitingTime = tiempoActual - p->arrivalTime;
                 
                 eventos.push_back(EventoGantt(p->pid, tiempoActual, 
@@ -235,6 +246,7 @@ private:
                 // Marcar inicio si es la primera vez
                 if (!procesoActual->started) {
                     procesoActual->startTime = tiempoActual;
+                    procesoActual->responseTime = procesoActual->startTime - procesoActual->arrivalTime;
                     procesoActual->started = true;
                 }
                 
@@ -315,6 +327,7 @@ private:
                 // Marcar inicio si es la primera vez
                 if (!procesoActual->started) {
                     procesoActual->startTime = tiempoActual;
+                    procesoActual->responseTime = procesoActual->startTime - procesoActual->arrivalTime;
                     procesoActual->started = true;
                 }
             }
@@ -406,6 +419,7 @@ private:
                 listos.erase(listos.begin());
                 
                 p->startTime = tiempoActual;
+                p->responseTime = p->startTime - p->arrivalTime;
                 p->waitingTime = tiempoActual - p->arrivalTime;
                 
                 eventos.push_back(EventoGantt(p->pid, tiempoActual, 

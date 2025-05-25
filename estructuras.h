@@ -16,13 +16,14 @@ struct Proceso {
     int waitingTime;    // Tiempo de espera
     int completionTime; // Tiempo de finalización
     int startTime;      // Primera vez que se ejecuta
+    int responseTime;   // Tiempo de respuesta (startTime - arrivalTime)
     bool started;       // Si ya empezó a ejecutarse
     
     // Constructor
     Proceso(std::string p, int bt, int at, int pr) 
         : pid(p), burstTime(bt), arrivalTime(at), priority(pr),
           remainingTime(bt), waitingTime(0), completionTime(0), 
-          startTime(-1), started(false) {}
+          startTime(-1), responseTime(0), started(false) {}
 };
 
 // Estructura para un Recurso (para sincronización)

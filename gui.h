@@ -29,6 +29,9 @@ private:
     // Scroll
     float scrollOffset = 0;
     
+    // Quantum actual
+    int quantumActual = 2;
+    
     // Colores para procesos
     std::map<std::string, sf::Color> coloresProcesos;
     std::vector<sf::Color> paletaColores;
@@ -164,8 +167,9 @@ public:
             ejecutarSimulacion();
         }
         else if (id == "set_quantum") {
-            // Por simplicidad, usar un quantum fijo
-            simulador.setQuantum(3);
+            // Ciclar entre valores de quantum comunes
+            quantumActual = (quantumActual % 5) + 1;
+            simulador.setQuantum(quantumActual);
         }
     }
     
@@ -267,6 +271,17 @@ public:
         estado.setString(textoEstado);
         estado.setFillColor(sf::Color::Black);
         window.draw(estado);
+        
+        // Mostrar quantum actual si es Round Robin
+        if (algoritmoActual == ROUND_ROBIN) {
+            sf::Text quantumText;
+            quantumText.setFont(font);
+            quantumText.setString("Quantum: " + std::to_string(quantumActual) + " (Click 'Set Quantum' para cambiar)");
+            quantumText.setCharacterSize(12);
+            quantumText.setFillColor(sf::Color::Blue);
+            quantumText.setPosition(50, 150);
+            window.draw(quantumText);
+        }
     }
     
     void dibujarGantt() {
@@ -395,6 +410,18 @@ public:
         window.draw(avgWT);
         
         ss.str("");
+        ss << "Avg Response Time: " << std::fixed << std::setprecision(2) 
+           << simulador.getAvgResponseTime() << " ciclos";
+        
+        sf::Text avgRT;
+        avgRT.setFont(font);
+        avgRT.setString(ss.str());
+        avgRT.setCharacterSize(16);
+        avgRT.setFillColor(sf::Color::Black);
+        avgRT.setPosition(50, 480);
+        window.draw(avgRT);
+        
+        ss.str("");
         ss << "Avg Completion Time: " << std::fixed << std::setprecision(2) 
            << simulador.getAvgCompletionTime() << " ciclos";
         
@@ -403,7 +430,7 @@ public:
         avgCT.setString(ss.str());
         avgCT.setCharacterSize(16);
         avgCT.setFillColor(sf::Color::Black);
-        avgCT.setPosition(50, 480);
+        avgCT.setPosition(50, 510);
         window.draw(avgCT);
         
         // Mostrar algoritmo actual
@@ -413,7 +440,7 @@ public:
             case FIFO: ss << "FIFO"; break;
             case SJF: ss << "SJF"; break;
             case SRTF: ss << "SRTF"; break;
-            case ROUND_ROBIN: ss << "Round Robin"; break;
+            case ROUND_ROBIN: ss << "Round Robin (Q=" << quantumActual << ")"; break;
             case PRIORITY: ss << "Priority"; break;
         }
         
@@ -422,7 +449,7 @@ public:
         algText.setString(ss.str());
         algText.setCharacterSize(16);
         algText.setFillColor(sf::Color::Black);
-        algText.setPosition(50, 510);
+        algText.setPosition(50, 540);
         window.draw(algText);
     }
 };

@@ -103,7 +103,7 @@ P2, WRITE, semaforo1, 3
 - **Colores de procesos**: Cada proceso tiene un color único cuando está ejecutándose
 - **Rojo claro**: Proceso esperando por un recurso
 - **Verde claro**: Proceso accediendo a un recurso
-- **Métricas**: Se muestran el tiempo promedio de espera y finalización
+- **Métricas**: Se muestran el tiempo promedio de espera, respuesta y finalización
 
 ## Estructura del Código
 - `estructuras.h`: Define las estructuras de datos principales
