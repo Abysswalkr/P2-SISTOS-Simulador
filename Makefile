@@ -1,13 +1,18 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -O2
+CXXFLAGS = -std=c++11 -Wall -O2 -Iinclude
 SFML_FLAGS = -lsfml-graphics -lsfml-window -lsfml-system
 
 # Nombre del ejecutable
 TARGET = simulador
 
+# Directorios
+SRCDIR = src
+INCDIR = include
+DATADIR = data
+
 # Archivos fuente
-SOURCES = main.cpp
-HEADERS = estructuras.h parser.h simulador_calendarizacion.h simulador_sincronizacion.h gui.h
+SOURCES = $(SRCDIR)/main.cpp
+HEADERS = $(wildcard $(INCDIR)/*.h)
 
 # Compilación
 all: $(TARGET)
@@ -23,4 +28,8 @@ clean:
 run: $(TARGET)
 	./$(TARGET)
 
-.PHONY: all clean run
+# Crear estructura de directorios si no existe
+dirs:
+	@mkdir -p $(SRCDIR) $(INCDIR) $(DATADIR) docs
+
+.PHONY: all clean run dirs

@@ -13,11 +13,12 @@ public:
     // Cargar procesos desde archivo
     static std::vector<Proceso> cargarProcesos(const std::string& archivo) {
         std::vector<Proceso> procesos;
-        std::ifstream file(archivo);
+        std::string rutaCompleta = construirRuta(archivo);
+        std::ifstream file(rutaCompleta);
         std::string linea;
         
         if (!file.is_open()) {
-            throw std::runtime_error("No se pudo abrir el archivo: " + archivo);
+            throw std::runtime_error("No se pudo abrir el archivo: " + rutaCompleta);
         }
         
         while (std::getline(file, linea)) {
@@ -52,11 +53,12 @@ public:
     // Cargar recursos desde archivo
     static std::vector<Recurso> cargarRecursos(const std::string& archivo) {
         std::vector<Recurso> recursos;
-        std::ifstream file(archivo);
+        std::string rutaCompleta = construirRuta(archivo);
+        std::ifstream file(rutaCompleta);
         std::string linea;
         
         if (!file.is_open()) {
-            throw std::runtime_error("No se pudo abrir el archivo: " + archivo);
+            throw std::runtime_error("No se pudo abrir el archivo: " + rutaCompleta);
         }
         
         while (std::getline(file, linea)) {
@@ -84,11 +86,12 @@ public:
     // Cargar acciones desde archivo
     static std::vector<Accion> cargarAcciones(const std::string& archivo) {
         std::vector<Accion> acciones;
-        std::ifstream file(archivo);
+        std::string rutaCompleta = construirRuta(archivo);
+        std::ifstream file(rutaCompleta);
         std::string linea;
         
         if (!file.is_open()) {
-            throw std::runtime_error("No se pudo abrir el archivo: " + archivo);
+            throw std::runtime_error("No se pudo abrir el archivo: " + rutaCompleta);
         }
         
         while (std::getline(file, linea)) {
@@ -118,6 +121,11 @@ public:
     }
     
 private:
+    // Construir ruta completa al archivo
+    static std::string construirRuta(const std::string& archivo) {
+        return "data/" + archivo;
+    }
+    
     // Función auxiliar para eliminar espacios en blanco
     static std::string trim(const std::string& str) {
         size_t first = str.find_first_not_of(' ');

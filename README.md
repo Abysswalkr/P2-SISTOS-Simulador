@@ -16,6 +16,27 @@ Este proyecto implementa un simulador visual de algoritmos de calendarización d
 - Soporte para **semáforos** con contador
 - Visualización de estados: Running, Waiting, Accessed Resource
 
+## Estructura del Proyecto
+```
+P2-SISTOS-Simulador/
+├── src/                # Código fuente
+│   └── main.cpp
+├── include/            # Archivos de cabecera
+│   ├── estructuras.h
+│   ├── parser.h
+│   ├── simulador_calendarizacion.h
+│   ├── simulador_sincronizacion.h
+│   └── gui.h
+├── data/               # Archivos de datos
+│   ├── procesos.txt
+│   ├── recursos.txt
+│   └── acciones.txt
+├── docs/               # Documentación
+│   └── Definición de Proyecto Simulador 2025.pdf
+├── Makefile
+└── README.md
+```
+
 ## Requisitos
 - C++11 o superior
 - SFML 2.5 o superior
@@ -47,7 +68,9 @@ make run
 
 ## Formato de Archivos de Entrada
 
-### procesos.txt
+Los archivos de entrada deben estar ubicados en el directorio `data/`.
+
+### data/procesos.txt
 ```
 <PID>, <BT>, <AT>, <Priority>
 ```
@@ -63,7 +86,7 @@ P2, 4, 1, 3
 P3, 8, 2, 1
 ```
 
-### recursos.txt
+### data/recursos.txt
 ```
 <Nombre>, <Contador>
 ```
@@ -76,7 +99,7 @@ mutex1, 1
 semaforo1, 3
 ```
 
-### acciones.txt
+### data/acciones.txt
 ```
 <PID>, <Acción>, <Recurso>, <Ciclo>
 ```
@@ -95,7 +118,7 @@ P2, WRITE, semaforo1, 3
 
 1. **Cargar archivos**: Usar los botones para cargar procesos.txt, recursos.txt y acciones.txt
 2. **Seleccionar algoritmo**: Click en el botón del algoritmo deseado
-3. **Configurar quantum**: Para Round Robin, usar el botón "Set Quantum"
+3. **Configurar quantum**: Para Round Robin, usar el botón "Set Quantum" (cicla entre valores 1-5)
 4. **Ejecutar**: Click en "Ejecutar" para iniciar la simulación
 5. **Navegar**: Usar la rueda del mouse para hacer scroll en el diagrama de Gantt
 
@@ -106,15 +129,55 @@ P2, WRITE, semaforo1, 3
 - **Métricas**: Se muestran el tiempo promedio de espera, respuesta y finalización
 
 ## Estructura del Código
-- `estructuras.h`: Define las estructuras de datos principales
-- `parser.h`: Parseo de archivos de entrada
-- `simulador_calendarizacion.h`: Implementación de algoritmos de calendarización
-- `simulador_sincronizacion.h`: Extensión con soporte para sincronización
-- `gui.h`: Interfaz gráfica con SFML
-- `main.cpp`: Punto de entrada del programa
+- `include/estructuras.h`: Define las estructuras de datos principales
+- `include/parser.h`: Parseo de archivos de entrada
+- `include/simulador_calendarizacion.h`: Implementación de algoritmos de calendarización
+- `include/simulador_sincronizacion.h`: Extensión con soporte para sincronización
+- `include/gui.h`: Interfaz gráfica con SFML
+- `src/main.cpp`: Punto de entrada del programa
 
 ## Notas de Implementación
 - El simulador ejecuta ciclo por ciclo para SRTF y Round Robin
 - El envejecimiento en Priority ocurre cada 5 ciclos
 - Los recursos se liberan automáticamente después de 1 ciclo de uso
 - La sincronización se simula sobre el resultado del algoritmo de calendarización
+- Los archivos de datos deben estar en el directorio `data/`
+
+# Guía Rápida de Compilación y Ejecución
+
+## Compilar el proyecto
+```bash
+make
+```
+
+## Ejecutar el simulador
+```bash
+make run
+```
+
+## Limpiar archivos compilados
+```bash
+make clean
+```
+
+## Estructura de archivos de datos
+
+Los archivos de entrada deben estar en el directorio `data/`:
+- `data/procesos.txt` - Lista de procesos
+- `data/recursos.txt` - Lista de recursos (mutex/semáforos)
+- `data/acciones.txt` - Acciones de sincronización
+
+## Uso del simulador
+
+1. Al ejecutar, se abrirá una ventana gráfica
+2. Cargar los archivos usando los botones correspondientes
+3. Seleccionar el algoritmo deseado
+4. Para Round Robin, ajustar el quantum con el botón "Set Quantum"
+5. Hacer clic en "Ejecutar" para ver la simulación
+
+## Solución de problemas
+
+Si hay errores de compilación relacionados con SFML:
+- En Ubuntu/Debian: `sudo apt-get install libsfml-dev`
+- En macOS: `brew install sfml`
+- En Windows: Descargar SFML de https://www.sfml-dev.org/ 

@@ -1,4 +1,4 @@
-#include "gui.h"
+#include "../include/gui.h"
 
 int main() {
     GUI gui;

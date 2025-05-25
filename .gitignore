@@ -1,0 +1,28 @@
+# Ejecutable
+simulador
+
+# Archivos objeto
+*.o
+*.obj
+
+# Archivos de compilación
+*.out
+*.exe
+
+# Directorios de IDE
+.vscode/
+.idea/
+*.xcodeproj/
+*.xcworkspace/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Archivos temporales
+*~
+*.swp
+*.swo
+
+# Archivos de log
+*.log 
