@@ -1,15 +1,120 @@
-# P2 SISTOS Simulador
-Simular algoritmos de planificación de procesos (FIFO, SJF, Round Robin, Priority) y mecanismos de sincronización (mutex y semáforos) a partir de archivos de texto.  Mostrar en tiempo real un diagrama de Gantt y estadísticas básicas (tiempos de espera y respuesta).  Incluir una GUI para cargar datos, configurar parámetros (quantum, prioridades) y controlar la ejecución.
+# Simulador de Algoritmos de Calendarización y Sincronización
 
-# Instalar SFML (si no lo tienes)
-# Ubuntu/Debian:
-sudo apt-get install libsfml-dev
+Este proyecto implementa un simulador visual de algoritmos de calendarización de procesos con soporte para sincronización mediante mutex y semáforos.
 
-# macOS:
+## Características
+
+### Algoritmos de Calendarización Implementados
+- **FIFO (First In First Out)**: Los procesos se ejecutan en orden de llegada
+- **SJF (Shortest Job First)**: Se ejecuta primero el proceso más corto (no apropiativo)
+- **SRTF (Shortest Remaining Time First)**: Versión apropiativa de SJF
+- **Round Robin**: Los procesos se ejecutan en turnos con un quantum de tiempo
+- **Priority**: Los procesos se ejecutan según su prioridad (con envejecimiento)
+
+### Sincronización
+- Soporte para **mutex** (exclusión mutua)
+- Soporte para **semáforos** con contador
+- Visualización de estados: Running, Waiting, Accessed Resource
+
+## Requisitos
+- C++11 o superior
+- SFML 2.5 o superior
+- Make
+
+## Instalación
+
+### Ubuntu/Debian
+```bash
+sudo apt-get install libsfml-dev g++ make
+```
+
+### macOS
+```bash
 brew install sfml
+```
 
-# Compilar
+## Compilación
+```bash
 make
+```
 
-# Ejecutar
+## Ejecución
+```bash
 make run
+# o directamente
+./simulador
+```
+
+## Formato de Archivos de Entrada
+
+### procesos.txt
+```
+<PID>, <BT>, <AT>, <Priority>
+```
+- PID: Identificador del proceso
+- BT: Burst Time (tiempo de ejecución)
+- AT: Arrival Time (tiempo de llegada)
+- Priority: Prioridad (1 = más alta)
+
+Ejemplo:
+```
+P1, 6, 0, 2
+P2, 4, 1, 3
+P3, 8, 2, 1
+```
+
+### recursos.txt
+```
+<Nombre>, <Contador>
+```
+- Nombre: Identificador del recurso
+- Contador: 1 para mutex, >1 para semáforo
+
+Ejemplo:
+```
+mutex1, 1
+semaforo1, 3
+```
+
+### acciones.txt
+```
+<PID>, <Acción>, <Recurso>, <Ciclo>
+```
+- PID: Proceso que realiza la acción
+- Acción: READ o WRITE
+- Recurso: Nombre del recurso a acceder
+- Ciclo: Ciclo en el que se realiza la acción
+
+Ejemplo:
+```
+P1, READ, mutex1, 2
+P2, WRITE, semaforo1, 3
+```
+
+## Uso del Simulador
+
+1. **Cargar archivos**: Usar los botones para cargar procesos.txt, recursos.txt y acciones.txt
+2. **Seleccionar algoritmo**: Click en el botón del algoritmo deseado
+3. **Configurar quantum**: Para Round Robin, usar el botón "Set Quantum"
+4. **Ejecutar**: Click en "Ejecutar" para iniciar la simulación
+5. **Navegar**: Usar la rueda del mouse para hacer scroll en el diagrama de Gantt
+
+## Interpretación del Diagrama de Gantt
+- **Colores de procesos**: Cada proceso tiene un color único cuando está ejecutándose
+- **Rojo claro**: Proceso esperando por un recurso
+- **Verde claro**: Proceso accediendo a un recurso
+- **Métricas**: Se muestran el tiempo promedio de espera y finalización
+
+## Estructura del Código
+- `estructuras.h`: Define las estructuras de datos principales
+- `parser.h`: Parseo de archivos de entrada
+- `simulador_calendarizacion.h`: Implementación de algoritmos de calendarización
+- `simulador_sincronizacion.h`: Extensión con soporte para sincronización
+- `gui.h`: Interfaz gráfica con SFML
+- `main.cpp`: Punto de entrada del programa
+
+## Notas de Implementación
+- El simulador ejecuta ciclo por ciclo para SRTF y Round Robin
+- El envejecimiento en Priority ocurre cada 5 ciclos
+- Los recursos se liberan automáticamente después de 1 ciclo de uso
+- La sincronización se simula sobre el resultado del algoritmo de calendarización

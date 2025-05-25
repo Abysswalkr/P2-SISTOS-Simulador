@@ -1,5 +1,4 @@
 #include "gui.h"
-#include "parser.h"
 
 int main() {
     GUI gui;
