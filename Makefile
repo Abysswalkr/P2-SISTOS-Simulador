@@ -1,35 +1,77 @@
-CXX = g++
-CXXFLAGS = -std=c++11 -Wall -O2 -Iinclude
-SFML_FLAGS = -lsfml-graphics -lsfml-window -lsfml-system
+# -------------------------------------------------------------
+# Makefile para compilar Simulador (SFML + ImGui + ImGui-SFML)
+# -------------------------------------------------------------
 
-# Nombre del ejecutable
-TARGET = simulador
+# ----------------------------------------------------------------
+# 1) Definimos compilador y banderas básicos
+# ----------------------------------------------------------------
+CXX      := g++
+CXXFLAGS := -std=c++17 -Wall \
+            -Iinclude \
+            -Iimgui \
+            -Iimgui-sfml \
+            -I/usr/include \
+            -DIMGUI_SFML_DEBUG_LOG
 
-# Directorios
-SRCDIR = src
-INCDIR = include
-DATADIR = data
+# ----------------------------------------------------------------
+# 2) Definimos las bibliotecas a enlazar (SFML y dependencias)
+# ----------------------------------------------------------------
+LDFLAGS  := -lsfml-graphics \
+            -lsfml-window   \
+            -lsfml-system   \
+            -lGL            \
+            -ldl            \
+            -lpthread
 
-# Archivos fuente
-SOURCES = $(SRCDIR)/main.cpp
-HEADERS = $(wildcard $(INCDIR)/*.h)
+# ----------------------------------------------------------------
+# 3) Listado de todos los .cpp que debe compilar
+#    - src/main.cpp           : tu código principal
+#    - imgui/*.cpp            : todos los archivos fuente de ImGui
+#    - imgui-sfml/imgui-SFML.cpp : binding ImGui→SFML
+# ----------------------------------------------------------------
+SRCS := \
+    src/main.cpp \
+    imgui/imgui.cpp \
+    imgui/imgui_draw.cpp \
+    imgui/imgui_widgets.cpp \
+    imgui/imgui_tables.cpp \
+    imgui/imgui_demo.cpp \
+    imgui-sfml/imgui-SFML.cpp
 
-# Compilación
+# ----------------------------------------------------------------
+# 4) Generamos la lista de .o a partir de los .cpp
+# ----------------------------------------------------------------
+OBJS := $(SRCS:.cpp=.o)
+
+# ----------------------------------------------------------------
+# 5) Nombre final del ejecutable
+# ----------------------------------------------------------------
+TARGET := simulador
+
+# ----------------------------------------------------------------
+.PHONY: all clean
+
+# ----------------------------------------------------------------
+# Regla principal: compilar y enlazar
+# ----------------------------------------------------------------
 all: $(TARGET)
 
-$(TARGET): $(SOURCES) $(HEADERS)
-	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(TARGET) $(SFML_FLAGS)
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LDFLAGS)
 
-# Limpiar archivos compilados
+# ----------------------------------------------------------------
+# Regla genérica para compilar cada .cpp en su .o correspondiente
+# ----------------------------------------------------------------
+# Ejemplo: src/main.cpp → src/main.o
+#          imgui/imgui.cpp → imgui/imgui.o
+#          imgui-sfml/imgui-SFML.cpp → imgui-sfml/imgui-SFML.o
+# ----------------------------------------------------------------
+%.o: %.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# ----------------------------------------------------------------
+# Limpiar todo: elimina .o y el ejecutable
+# ----------------------------------------------------------------
 clean:
-	rm -f $(TARGET)
-
-# Ejecutar
-run: $(TARGET)
-	./$(TARGET)
-
-# Crear estructura de directorios si no existe
-dirs:
-	@mkdir -p $(SRCDIR) $(INCDIR) $(DATADIR) docs
-
-.PHONY: all clean run dirs
+	rm -f $(OBJS) $(TARGET)
