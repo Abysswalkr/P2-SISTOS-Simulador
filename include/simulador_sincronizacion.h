@@ -47,7 +47,7 @@ public:
     }
     
     // Override ejecutar para incluir sincronización
-    void ejecutar(TipoAlgoritmo tipo) override {
+    void ejecutar(TipoAlgoritmo tipo) {
         // Primero ejecutar el algoritmo base
         SimuladorCalendarizacion::ejecutar(tipo);
         
